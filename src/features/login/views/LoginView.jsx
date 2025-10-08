@@ -1,24 +1,33 @@
 import { useEffect, useState } from "react"
+import { onLogin, onFetchUsers } from "@/features/login/services"
 
-const LoginView = ({ onLogin, setloggedInUser }) => {
+const LoginView = ({ setloggedInUser }) => {
     const [userName, setuserName] = useState('')
     const [password, setpassword] = useState('')
-    const [isAuthenticated, setisAuthenticated] = useState(false)
 
     useEffect(() => {
-        if (userName === 'admin' && password === 'admin1') {
-            setisAuthenticated(true)
-        } else {
-            setisAuthenticated(false)
+        onFetchUsers()
+    }, [])
+
+    const handleLogin = async () => {
+        try {
+            const res = await onLogin(userName, password);
+            if (res.status) {
+                setloggedInUser(userName)
+            } else {
+                alert(res.message)
+            }
+        } catch (err) {
+            console.error("Error logging in user:", err);
         }
-    }, [userName, password])
+    }
 
     return (
         <div>
             <h1>Login to To do list</h1>
             <input
                 value={userName}
-                onChange={(e) => { setuserName(e.target.value); setloggedInUser(e.target.value) }}
+                onChange={(e) => { setuserName(e.target.value) }}
                 type="text"
                 placeholder='Username'
             />
@@ -28,12 +37,7 @@ const LoginView = ({ onLogin, setloggedInUser }) => {
                 onChange={(e) => { setpassword(e.target.value) }}
                 placeholder='Password'
             />
-            {
-                isAuthenticated ? <button onClick={onLogin}>Login</button> : ''
-            }
-            {/* {
-                isAuthenticated && <button onClick={onLogin}>Login</button>
-            } */}
+            <button onClick={handleLogin}>Login</button>
         </div>
     )
 }
